@@ -20,10 +20,10 @@ block content
 
 				form(action='/api/user/login', method='post')
 					label(for='username') Username
-					input(type='text', name='username', placeholder='Your Username').u-full-width
+					input(type='text', name='username', placeholder='Your Username', required).u-full-width
 
 					label(for='password') Password
-					input(type='password', name='password', placeholder='Your Password').u-full-width
+					input(type='password', name='password', placeholder='Your Password', required).u-full-width
 
 					button(type='submit').button-primary.u-full-width Login
 
@@ -33,12 +33,12 @@ block content
 
 				form(action='/api/user', method='post')
 					label(for='username') Username
-					input(type='text', name='username', placeholder='Your Username').u-full-width
+					input(type='text', name='username', placeholder='Your Username', required).u-full-width
 
 					label(for='password') Password
-					input(type='password', name='password', placeholder='Your Password').u-full-width
+					input(type='password', name='password', placeholder='Your Password', required).u-full-width
 
 					label(for='passwordConf') Confirm Password
-					input(type='password', name='passwordConf', placeholder='Confirm your Password').u-full-width
+					input(type='password', name='passwordConf', placeholder='Confirm your Password', required).u-full-width
 
 					button(type='submit').button-primary.u-full-width Register

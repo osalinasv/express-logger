@@ -1,16 +1,14 @@
 const User = require('../models/user')
 
-const _ = require('lodash')
-const fp = require('lodash/fp')
+const log = require('./log')
 
-const vUserPassword = (data) => {
-	return !_.isEmpty(data.username) && !_.isEmpty(data.password)
+const vPassword = (password, confirmation) => {
+	return password && confirmation && password === confirmation
 }
 
-const processParams = fp.flow(
-	fp.omitBy(fp.isEmpty),
-	fp.mapValues(value => _.trim(value))
-)
+const vUserPassword = (data) => {
+	return data.username && data.password
+}
 
 const redirectByType = (type) => {
 	switch (type) {
@@ -20,11 +18,13 @@ const redirectByType = (type) => {
 }
 
 const create = (req, res, next) => {
-	const data = processParams(req.body)
+	const data = req.body
 
-	if (!data.password || !data.passwordConf || data.password !== data.passwordConf) {
-		const error = new Error('Passwords do not match.')
+	if (!vPassword(data.password, data.passwordConf)) {
+		const error = new Error('Passwords do not match')
 		error.status = 400
+
+		log.saveLog(`Tried to create a new User but got error: ${error.message || ''}`)
 
 		return next(error)
 	}
@@ -35,40 +35,84 @@ const create = (req, res, next) => {
 			password: data.password
 		}
 
-		if (!_.isEmpty(data.type)) finalData.type = data.type.toLowerCase()
+		if (data.type) finalData.type = data.type
 
 		User.create(finalData, (err, user) => {
-			if (err) return next(err)
+			if (err) {
+				log.saveLog(`Tried to create a new User but got error: ${err.message || ''}`)
+				return next(err)
+			}
+
+			log.saveLog(`A new User with username ${user.username || ''} and ID ${user._id || ''} was created`)
 
 			req.session.userId = user._id
 			return res.redirect(redirectByType(user.type))
 		})
 	} else {
-		const error = new Error('Invalid input data for User creation.')
+		const error = new Error('Invalid Username or Password to create a User')
 		error.status = 400
+
+		log.saveLog(`Tried to create a new User but got error: ${error.message || ''}`)
 
 		return next(error)
 	}
 }
 
+const delt = (req, res, next) => {
+	const { username, id } = req.body
+
+	if (!username && !id) {
+		const error = new Error('Must provide either a Username or the User ID to delete a User')
+		error.status = 400
+
+		log.saveLog(`Tried to delete a User but got error: ${error.message || ''}`)
+
+		return next(error)
+	} else if (username) {
+		User.findOneAndRemove({ username }, (err, user) => {
+			if (err) {
+				log.saveLog(`Tried to delete a User but got error: ${err.message || ''}`)
+				return next(err)
+			}
+
+			return res.status(200).send(user)
+		})
+	} else if (id) {
+		User.findByIdAndRemove(id, (err, user) => {
+			if (err) {
+				log.saveLog(`Tried to delete a User but got error: ${err.message || ''}`)
+				return next(err)
+			}
+
+			return res.status(200).send(user)
+		})
+	}
+}
+
 const login = (req, res, next) => {
-	const data = processParams(req.body)
+	const data = req.body
 
 	if (vUserPassword(data)) {
 		User.authenticate(data.username, data.password, (err, user) => {
 			if (err || !user) {
-				const error = new Error('Wrong email or password.')
+				const error = new Error('Wrong Username or Password')
 				error.status = 401
+
+				log.saveLog(`User ${data.username || ''} tried to login but got error: ${error.message || ''}`)
 
 				return next(error)
 			} else {
+				log.saveLog(`User ${data.username || ''} successfully logged in`, user._id)
+
 				req.session.userId = user._id
 				return res.redirect(redirectByType(user.type))
 			}
 		})
 	} else {
-		const error = new Error('All fields required.')
+		const error = new Error('All fields are required to log in')
 		error.status = 400
+
+		log.saveLog(`User ${data.username} tried to login but got error: ${error.message || ''}`)
 
 		return next(error)
 	}
@@ -76,10 +120,15 @@ const login = (req, res, next) => {
 
 const logout = (req, res, next) => {
 	if (req.session) {
+		console.log(req.session)
+		const id = req.session.userId
+
 		req.session.destroy((err) => {
 			if (err) {
+				log.saveLog(`User ${id || ''} tried to logout but got error: ${err.message || ''}`, id)
 				return next(err)
 			} else {
+				log.saveLog(`User ${id || ''} successfully logged out`, id)
 				return res.redirect('/')
 			}
 		})
@@ -100,11 +149,14 @@ const loadProfile = (userId, res, next, callback) => {
 const userProfile = (req, res, next) => {
 	loadProfile(req.session.userId, res, next, (user) => {
 		if (user === null) {
-			var error = new Error('Not authorized! Go back!');
-			error.status = 400;
+			var error = new Error('User not authorized. No session detected. ');
+			error.status = 403;
+
+			log.saveLog(`Someone tried to navigate to /user but got error: ${error.message}`)
 
 			return next(error);
 		} else {
+			log.saveLog(`User ${user.username} successfully navigated to /user`, user._id)
 			return res.render('user', { user: user })
 		}
 	})
@@ -113,11 +165,14 @@ const userProfile = (req, res, next) => {
 const adminProfile = (req, res, next) => {
 	loadProfile(req.session.userId, res, next, (user) => {
 		if (user === null || user.type !== 'admin') {
-			var error = new Error('Not authorized! Go back!');
-			error.status = 400;
+			var error = new Error('User not authorized to access the Admin dashboard. Please go back');
+			error.status = 403;
+
+			log.saveLog(`Someone tried to navigate to /admin but got error: ${error.message}`)
 
 			return next(error);
 		} else {
+			log.saveLog(`User ${user.username} successfully navigated to /admin`, user._id)
 			return res.render('admin', { user: user })
 		}
 	})
@@ -126,7 +181,8 @@ const adminProfile = (req, res, next) => {
 module.exports = {
 	adminProfile,
 	create,
+	delt,
 	login,
 	logout,
-	userProfile,
+	userProfile
 }

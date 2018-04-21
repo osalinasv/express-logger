@@ -1,5 +1,6 @@
 const mongoose = require('mongoose')
 const bcrypt = require('bcrypt')
+const _ = require('lodash')
 
 const SALT_ROUNDS = 10
 
@@ -8,17 +9,18 @@ const UserSchema = new mongoose.Schema({
 		type: String,
 		unique: true,
 		required: true,
-		trim: true,
+		trim: true
 	},
 	type: {
 		type: String,
 		required: true,
 		default: 'user',
 		trim: true,
+		lowercase: true
 	},
 	password: {
 		type: String,
-		required: true,
+		required: true
 	}
 })
 
@@ -39,10 +41,10 @@ UserSchema.statics.authenticate = function (username, password, callback) {
 			if (err) {
 				return callback(err)
 			} else if (!user) {
-				var err = new Error('User not found.')
-				err.status = 401
+				const error = new Error('User not found.')
+				error.status = 401
 
-				return callback(err)
+				return callback(error)
 			}
 
 			bcrypt.compare(password, user.password, function (err, result) {
