@@ -1,6 +1,6 @@
 const mongoose = require('mongoose')
 
-const LogSchema = new mongoose.Schema({
+let LogSchema = new mongoose.Schema({
 	details: {
 		type: String,
 		required: true,

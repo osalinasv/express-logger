@@ -3,8 +3,27 @@ extends layout
 block content
 	header.container
 		h1 Admin dashboard
-		p Welcome back, boss. Here is the complete history of all actions made by your users. Do note only the latest 200 records are kept alive.
+		p Welcome back, #{user.username}. Here is the complete history of all actions made by your users. Do note only the latest 200 records are kept alive.
 		p Remember you can always 
 			a(href="/api/user/logout")
 				b Log out 
 			| by clicking the link.
+
+		table
+			tr
+				th Timestamp
+				th Who
+				th Details
+			each log in logs.list
+				tr
+					td.no-wrap= log.timestamp
+					td #{log.user && log.user.username ? log.user.username : 'Unknown'}
+					td= log.details
+
+		.pagination
+			p Showing #{logs.start}-#{logs.end} / #{logs.total}
+			nav
+				if (logs.prevPage)
+					a(href=`/admin/${logs.prevPage || 1}`) Previous
+				if (logs.nextPage)
+					a(href=`/admin/${logs.nextPage || 1}`) Next

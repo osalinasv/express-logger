@@ -8,3 +8,56 @@ block content
 			a(href="/api/user/logout")
 				b Log out 
 			| by clicking the link.
+
+	main.container
+		.row
+			.six.columns
+				h3 Press a button
+				p Press this button to notify the admin you pressed the button.
+
+				button#button.u-full-width Press me
+
+			.six.columns
+				h3 Fill a form
+				p Fill and send this form data to the admin.
+
+				form#form
+					textarea#data(name="data", rows="10", required).u-full-width
+					button(type="submit").u-full-width Send
+
+block script
+	script.
+		const onButtonClick = (e) => {
+			fetch('/api/log/', {
+				method: 'post',
+				headers: {
+					'Accept': 'application/json',
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({
+					details: 'User pressed the button',
+					user: '#{user._id}'
+				})
+			})
+		}
+
+		const onFormSubmit = (e) => {
+			e.preventDefault()
+
+			fetch('/api/log/', {
+				method: 'post',
+				headers: {
+					'Accept': 'application/json',
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({
+					details: `User sent: ${data.value}`,
+					user: '#{user._id}'
+				})
+			})
+
+			return false
+		}
+
+		button.addEventListener('click', onButtonClick)
+		form.addEventListener('submit', onFormSubmit)

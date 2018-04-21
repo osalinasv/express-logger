@@ -47,3 +47,24 @@ small, .font_small {font-size: 0.8em;}
 
 	padding: 2em 0;
 }
+
+table {
+	width: 100%;
+	table-layout: auto;
+}
+
+table .no-wrap {
+	white-space: nowrap;
+}
+
+.pagination {
+	display: flex;
+	flex-flow: row nowrap;
+
+	justify-content: space-between;
+}
+
+.pagination nav a {
+	display: inline-block;
+	margin-left: 1em;
+}

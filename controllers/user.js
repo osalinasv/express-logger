@@ -102,7 +102,7 @@ const login = (req, res, next) => {
 
 				return next(error)
 			} else {
-				log.saveLog(`User ${data.username || ''} successfully logged in`, user._id)
+				log.saveLog(`User successfully logged in`, user._id)
 
 				req.session.userId = user._id
 				return res.redirect(redirectByType(user.type))
@@ -120,15 +120,14 @@ const login = (req, res, next) => {
 
 const logout = (req, res, next) => {
 	if (req.session) {
-		console.log(req.session)
 		const id = req.session.userId
 
 		req.session.destroy((err) => {
 			if (err) {
-				log.saveLog(`User ${id || ''} tried to logout but got error: ${err.message || ''}`, id)
+				log.saveLog(`User tried to logout but got error: ${err.message || ''}`, id)
 				return next(err)
 			} else {
-				log.saveLog(`User ${id || ''} successfully logged out`, id)
+				log.saveLog(`User successfully logged out`, id)
 				return res.redirect('/')
 			}
 		})
@@ -156,8 +155,8 @@ const userProfile = (req, res, next) => {
 
 			return next(error);
 		} else {
-			log.saveLog(`User ${user.username} successfully navigated to /user`, user._id)
-			return res.render('user', { user: user })
+			log.saveLog(`User successfully navigated to /user`, user._id)
+			return res.render('user', { user })
 		}
 	})
 }
@@ -172,8 +171,17 @@ const adminProfile = (req, res, next) => {
 
 			return next(error);
 		} else {
-			log.saveLog(`User ${user.username} successfully navigated to /admin`, user._id)
-			return res.render('admin', { user: user })
+			log.getLogs(10, req.params.page, (err, logs) => {
+				if (err) return next(err)
+
+				if (logs && logs.list) {
+					logs.list.forEach(log => {
+						log.timestamp = log.createdAt.toLocaleString('en-US')
+					})
+				}
+
+				return res.render('admin', { user, logs })
+			})
 		}
 	})
 }

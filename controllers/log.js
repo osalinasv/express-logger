@@ -69,26 +69,67 @@ const delt = (req, res, next) => {
 	}
 }
 
-const get = (req, res, next) => {
+const getLogs = (perPage, page, callback) => {
+	perPage = parseInt(perPage)
+	page = parseInt(page)
+
+	const start = Math.max(0, page - 1) * perPage
+
 	Log.find()
 		.populate('user', '_id username')
+		.sort({ createdAt: -1 })
+		.skip(start)
+		.limit(perPage)
 		.exec((err, logs) => {
-			if (err) return next(err)
+			Log.count({ }, (err, count) => {
+				if (err) return next(err)
 
-			if (logs === null) {
-				const error = new Error('There are no Logs registered')
-				error.status = 400
+				const end = start + perPage
 
-				return next(error)
-			} else {
-				return res.status(200).send(logs)
-			}
+				let prevPage = page - 1
+				prevPage = prevPage >= 1 ? prevPage : false
+
+				let nextPage = page + 1
+				nextPage = end < count ? nextPage : false
+
+				const res = {
+					list: logs,
+					total: count,
+
+					start: Math.min(start + 1, count),
+					end: Math.min(end, count),
+
+					prevPage,
+					nextPage,
+				}
+	
+				callback(err, res)
+			});
 		})
+}
+
+const get = (req, res, next) => {
+	const page = parseInt(req.query.page) || 0
+	const perPage = parseInt(req.query.perPage) || 10
+
+	getLogs(page, perPage, (err, logs) => {
+		if (err) return next(err)
+
+		if (logs === null) {
+			const error = new Error('There are no Logs registered')
+			error.status = 400
+
+			return next(error)
+		} else {
+			return res.status(200).send(logs)
+		}
+	})
 }
 
 module.exports = {
 	create,
 	delt,
 	get,
+	getLogs,
 	saveLog
 }
