@@ -38,7 +38,7 @@ app.use(bodyParser.urlencoded({ extended: true }))
 app.use(expressSanitizer())
 app.use(cookieParser())
 
-app.use(cleanup)
+// app.use(cleanup)
 
 app.use(express.static(path.join(__dirname, 'public')))
 

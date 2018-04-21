@@ -39,6 +39,16 @@ block script
 					user: '#{user._id}'
 				})
 			})
+			.then(res => {
+				if (res.status === 200) {
+					toastr.success('Success!')
+				} else {
+					toastr.error('Could not complete action')
+				}
+			})
+			.catch(err => {
+				if (err) toastr.error(`An error ocurred: ${err.status} ${err.message}`)
+			})
 		}
 
 		const onFormSubmit = (e) => {
@@ -54,6 +64,16 @@ block script
 					details: `User sent: ${data.value}`,
 					user: '#{user._id}'
 				})
+			})
+			.then(res => {
+				if (res.status === 200) {
+					toastr.success('Success!')
+				} else {
+					toastr.error('Could not complete action')
+				}
+			})
+			.catch(err => {
+				if (err) toastr.error(`An error ocurred: ${err.status} ${err.message}`)
 			})
 
 			return false
