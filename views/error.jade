@@ -4,4 +4,8 @@ block content
 	main.container
 		h1= message
 		h2= error.status
-		pre #{error.stack}
+
+		p
+			a(href="javascript:history.back()") Go back
+			|  or 
+			a(href="/") Go to the index page

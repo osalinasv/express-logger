@@ -3,4 +3,7 @@ extends layout
 block content
 	header.container
 		h1 Admin dashboard
-		p Welcome back, boss. Here is the complete history of all actions made by your users.
+		p Welcome back, boss. Here is the complete history of all actions made by your users. You can always 
+			a(href="/api/user/logout")
+				b Log out 
+			| by clicking the link.

@@ -26,13 +26,6 @@ const create = (req, res, next) => {
 		const error = new Error('Passwords do not match.')
 		error.status = 400
 
-		res.status(400).send({
-			error: {
-				message: error.message,
-				type: 'password'
-			}
-		})
-
 		return next(error)
 	}
 
@@ -53,13 +46,6 @@ const create = (req, res, next) => {
 	} else {
 		const error = new Error('Invalid input data for User creation.')
 		error.status = 400
-
-		res.status(400).send({
-			error: {
-				message: error.message,
-				type: 'invalid'
-			}
-		})
 
 		return next(error)
 	}
