@@ -1,0 +1,10 @@
+extends layout
+
+block content
+	header.container
+		h1 User page
+		p Welcome back, #{user.username}
+		p This is your little playground, every action you do is being recorded. You can always 
+			a(href="/api/user/logout")
+				b Log out 
+			| by clicking the link.

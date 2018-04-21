@@ -8,11 +8,10 @@ const bodyParser = require('body-parser')
 const dotenv = require('dotenv')
 dotenv.load()
 
-console.log(process.env.MONGODB_URI)
+const session = require('express-session')
+const MongoStore = require('connect-mongo')(session)
 
-const index = require('./routes/index')
-const users = require('./routes/users')
-
+const db = require('./db')
 const app = express()
 
 // view engine setup
@@ -27,8 +26,17 @@ app.use(bodyParser.urlencoded({ extended: false }))
 app.use(cookieParser())
 app.use(express.static(path.join(__dirname, 'public')))
 
-app.use('/', index)
-app.use('/users', users)
+app.use(session({
+	secret: 'work hard',
+	resave: true,
+	saveUninitialized: false,
+	store: new MongoStore({
+		mongooseConnection: db
+	})
+}))
+
+app.use('/', require('./routes/index'))
+app.use('/api/user', require('./routes/users'))
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

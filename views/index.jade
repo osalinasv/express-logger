@@ -1,5 +1,42 @@
 extends layout
 
 block content
-  h1= title
-  p Welcome to #{title}
+	header.container
+		h1 Express-Logger
+		p An Express.js web-app that logs everything its users do and displays it to the admin. Kinda creepy.
+	
+	main.container
+		.row
+			#login-form.six.columns
+				h2 Login
+				p Login either as an user or an admin with your username and password
+				p (Psst. the admin data is 
+					b 'admin' 
+					| and 
+					b 'root'
+					| , don't tell anybody).
+
+				form(action='/api/user/login', method='post')
+					label(for='username') Username
+					input(type='text', name='username', placeholder='Your Username').u-full-width
+
+					label(for='password') Password
+					input(type='password', name='password', placeholder='Your Password').u-full-width
+
+					button(type='submit').button-primary.u-full-width Login
+
+			#register-form.six.columns
+				h2 Register
+				p Register as a new user. Only normal users can be created, no admins.
+
+				form(action='/api/user', method='post')
+					label(for='username') Username
+					input(type='text', name='username', placeholder='Your Username').u-full-width
+
+					label(for='password') Password
+					input(type='password', name='password', placeholder='Your Password').u-full-width
+
+					label(for='passwordConf') Confirm Password
+					input(type='password', name='passwordConf', placeholder='Confirm your Password').u-full-width
+
+					button(type='submit').button-primary.u-full-width Register
