@@ -1,6 +1,5 @@
 const mongoose = require('mongoose')
 const bcrypt = require('bcrypt')
-const _ = require('lodash')
 
 const SALT_ROUNDS = 10
 

@@ -102,7 +102,7 @@ const login = (req, res, next) => {
 
 				return next(error)
 			} else {
-				log.saveLog(`User successfully logged in`, user._id)
+				log.saveLog('User successfully logged in', user._id)
 
 				req.session.userId = user._id
 				return res.redirect(redirectByType(user.type))
@@ -127,7 +127,7 @@ const logout = (req, res, next) => {
 				log.saveLog(`User tried to logout but got error: ${err.message || ''}`, id)
 				return next(err)
 			} else {
-				log.saveLog(`User successfully logged out`, id)
+				log.saveLog('User successfully logged out', id)
 				return res.redirect('/')
 			}
 		})
@@ -138,24 +138,24 @@ const loadProfile = (userId, res, next, callback) => {
 	User.findById(userId)
 		.exec(function (err, user) {
 			if (err) {
-				return next(err);
+				return next(err)
 			} else {
 				callback(user)
 			}
-		});
+		})
 }
 
 const userProfile = (req, res, next) => {
 	loadProfile(req.session.userId, res, next, (user) => {
 		if (user === null) {
-			var error = new Error('User not authorized. No session detected. ');
-			error.status = 403;
+			var error = new Error('User not authorized. No session detected. ')
+			error.status = 403
 
 			log.saveLog(`Someone tried to navigate to /user but got error: ${error.message}`)
 
-			return next(error);
+			return next(error)
 		} else {
-			log.saveLog(`User successfully navigated to /user`, user._id)
+			log.saveLog('User successfully navigated to /user', user._id)
 			return res.render('user', { user })
 		}
 	})
@@ -164,12 +164,12 @@ const userProfile = (req, res, next) => {
 const adminProfile = (req, res, next) => {
 	loadProfile(req.session.userId, res, next, (user) => {
 		if (user === null || user.type !== 'admin') {
-			var error = new Error('User not authorized to access the Admin dashboard. Please go back');
-			error.status = 403;
+			var error = new Error('User not authorized to access the Admin dashboard. Please go back')
+			error.status = 403
 
 			log.saveLog(`Someone tried to navigate to /admin but got error: ${error.message}`)
 
-			return next(error);
+			return next(error)
 		} else {
 			log.getLogs(10, req.params.page, (err, logs) => {
 				if (err) return next(err)

@@ -1,4 +1,3 @@
-const mongoose = require('mongoose')
 const Log = require('../models/log')
 const User = require('../models/user')
 
@@ -69,7 +68,7 @@ const delt = (req, res, next) => {
 	}
 }
 
-const getLogs = (perPage, page, callback) => {
+const getLogs = (perPage, page, callback, next) => {
 	perPage = parseInt(perPage)
 	page = parseInt(page)
 
@@ -82,7 +81,7 @@ const getLogs = (perPage, page, callback) => {
 		.limit(perPage)
 		.exec((err, logs) => {
 			Log.count({ }, (err, count) => {
-				if (err) return next(err)
+				if (err && next) return next(err)
 
 				const end = start + perPage
 
@@ -104,7 +103,7 @@ const getLogs = (perPage, page, callback) => {
 				}
 	
 				callback(err, res)
-			});
+			})
 		})
 }
 
@@ -123,7 +122,7 @@ const get = (req, res, next) => {
 		} else {
 			return res.status(200).send(logs)
 		}
-	})
+	}, next)
 }
 
 module.exports = {
